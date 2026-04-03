@@ -74,12 +74,12 @@ PreTrainedTranslator/
 ## Placeholders
 
 ### Screenshots
-
+<!-- 
 *(Replace this section with screenshots of your Streamlit web interface)*
 
 `[Screenshot 1 Placeholder: Main Application Screen]`
 
-`[Screenshot 2 Placeholder: Example Translation Output]`
+`[Screenshot 2 Placeholder: Example Translation Output]` -->
 
 ## Future Improvements
 
