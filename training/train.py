@@ -39,25 +39,25 @@ def preprocess_function(examples):
         max_length=max_input_length,
         truncation=True,
         padding="max_length",
-        # Do NOT pass return_tensors here — keep output as plain Python lists.
-        # Returning TF/NumPy tensors inside .map() causes dtype issues downstream.
     )
 
-    # text_target= tells MarianMT tokenizer to use the target-language
-    # vocabulary for Hindi, which is separate from the source vocabulary.
     labels = tokenizer(
         text_target=targets,
         max_length=max_target_length,
         truncation=True,
         padding="max_length",
-        # Same reason — keep as plain int lists so labels stay int64-compatible.
     )
 
-    # Assign raw integer token ID lists as labels.
-    # DataCollatorForSeq2Seq will replace padding token IDs with -100
-    # (so they're ignored in loss) and convert everything to TF int64 tensors
-    # at collation time — the only safe place to do that conversion.
-    model_inputs["labels"] = labels["input_ids"]
+    # Fix: Ensure labels are strict Python integers and pre-replace pad tokens with -100.
+    # This prevents PyArrow/HuggingFace from inferring them as floats (which causes
+    # the 'Cannot convert [array([ ... ])] to EagerTensor of dtype int64' error later).
+    # Since they are integers, prepare_tf_dataset and DataCollator will correctly handle them as int64.
+    pad_token_id = tokenizer.pad_token_id
+    model_inputs["labels"] = [
+        [-100 if int(t) == pad_token_id else int(t) for t in label]
+        for label in labels["input_ids"]
+    ]
+
     return model_inputs
 
 print("Tokenizing datasets...")
@@ -77,7 +77,7 @@ tokenized_datasets = raw_datasets.map(
 print("Loading model...")
 model = TFAutoModelForSeq2SeqLM.from_pretrained(model_checkpoint)
 
-data_collator = DataCollatorForSeq2Seq(tokenizer, model=model, return_tensors="tf")
+data_collator = DataCollatorForSeq2Seq(tokenizer, model=model, return_tensors="np")
 
 print("Preparing TF datasets...")
 train_dataset = model.prepare_tf_dataset(
