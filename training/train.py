@@ -24,7 +24,8 @@ raw_datasets = load_dataset('cfilt/iitb-english-hindi')
 
 print("Filtering dataset size for efficient training...")
 raw_datasets["train"] = raw_datasets["train"].select(range(50000))
-raw_datasets["validation"] = raw_datasets["validation"].select(range(2000))
+val_size = min(2000, len(raw_datasets["validation"]))
+raw_datasets["validation"] = raw_datasets["validation"].select(range(val_size))
 
 print("Loading tokenizer...")
 tokenizer = AutoTokenizer.from_pretrained(model_checkpoint)
@@ -32,21 +33,30 @@ tokenizer = AutoTokenizer.from_pretrained(model_checkpoint)
 def preprocess_function(examples):
     inputs = [ex[source_lang] for ex in examples['translation']]
     targets = [ex[target_lang] for ex in examples['translation']]
-    
+
     model_inputs = tokenizer(
-        inputs, 
-        max_length=max_input_length, 
+        inputs,
+        max_length=max_input_length,
         truncation=True,
-        padding="max_length"
+        padding="max_length",
+        # Do NOT pass return_tensors here — keep output as plain Python lists.
+        # Returning TF/NumPy tensors inside .map() causes dtype issues downstream.
     )
 
+    # text_target= tells MarianMT tokenizer to use the target-language
+    # vocabulary for Hindi, which is separate from the source vocabulary.
     labels = tokenizer(
-        text_target=targets, 
-        max_length=max_target_length, 
+        text_target=targets,
+        max_length=max_target_length,
         truncation=True,
-        padding="max_length"
+        padding="max_length",
+        # Same reason — keep as plain int lists so labels stay int64-compatible.
     )
 
+    # Assign raw integer token ID lists as labels.
+    # DataCollatorForSeq2Seq will replace padding token IDs with -100
+    # (so they're ignored in loss) and convert everything to TF int64 tensors
+    # at collation time — the only safe place to do that conversion.
     model_inputs["labels"] = labels["input_ids"]
     return model_inputs
 
@@ -57,11 +67,12 @@ tokenized_datasets = raw_datasets.map(
     load_from_cache_file=True
 )
 
-# CRITICAL FIX: Ensure tensors are correctly formatted for TensorFlow
-tokenized_datasets.set_format(
-    type="tensorflow",
-    columns=["input_ids", "attention_mask", "labels"]
-)
+# Do NOT call set_format(type="tensorflow") here.
+# That call silently casts integer label token IDs to float32 TF tensors,
+# which causes: TypeError: Cannot convert ... to EagerTensor of dtype int64
+# inside prepare_tf_dataset(). Instead, leave the dataset in its native
+# Python/NumPy integer format — prepare_tf_dataset() + DataCollatorForSeq2Seq
+# (with return_tensors="tf") handle the TF conversion correctly and preserve int64.
 
 print("Loading model...")
 model = TFAutoModelForSeq2SeqLM.from_pretrained(model_checkpoint)
