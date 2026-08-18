@@ -1,5 +1,5 @@
 import streamlit as st
-from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+from transformers import AutoTokenizer, TFAutoModelForSeq2SeqLM
 import numpy as np
 import os
 
@@ -22,7 +22,7 @@ def load_model():
             st.stop()
             
     tokenizer = AutoTokenizer.from_pretrained(model_dir)
-    model = AutoModelForSeq2SeqLM.from_pretrained(model_dir)
+    model = TFAutoModelForSeq2SeqLM.from_pretrained(model_dir)
     return tokenizer, model
 
 tokenizer, model = load_model()
@@ -39,7 +39,7 @@ input_text = st.text_area("Enter English text:", "", height=150)
 if st.button("Translate"):
     if input_text.strip():
         # Tokenize input
-        tokenized_input = tokenizer([input_text], return_tensors='pt')
+        tokenized_input = tokenizer([input_text], return_tensors='tf')
 
         # Generate translation
         generated_tokens = model.generate(**tokenized_input, max_length=max_length)
@@ -54,4 +54,4 @@ if st.button("Translate"):
 
 # Footer
 st.markdown("---")
-st.caption("Made with ❤️ using PyTorch, HuggingFace Transformers, and Streamlit.")
+st.caption("Made with ❤️ using TensorFlow, HuggingFace Transformers, and Streamlit.")

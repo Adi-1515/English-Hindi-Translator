@@ -17,14 +17,17 @@ weight_decay = 0.01
 num_train_epochs = 1
 
 base_dir = os.path.dirname(os.path.dirname(__file__))
-model_save_path = os.path.join(base_dir, "model")
+# Changed the save path to "tf_model" to match the efficiently requested output directory
+model_save_path = os.path.join(base_dir, "tf_model")
 
 print("Loading dataset...")
 raw_datasets = load_dataset('cfilt/iitb-english-hindi')
 
-print("Filtering dataset size for efficient training...")
-raw_datasets["train"] = raw_datasets["train"].select(range(50000))
-val_size = min(2000, len(raw_datasets["validation"]))
+print("Filtering dataset size for fast training on CPU...")
+# REDUCED from 50000 to 1000 for fast CPU-friendly training
+raw_datasets["train"] = raw_datasets["train"].select(range(1000))
+# REDUCED validation size from 2000 to 100
+val_size = min(100, len(raw_datasets["validation"]))
 raw_datasets["validation"] = raw_datasets["validation"].select(range(val_size))
 
 print("Loading tokenizer...")
