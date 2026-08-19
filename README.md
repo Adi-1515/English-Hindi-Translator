@@ -1,11 +1,11 @@
-# English to Hindi Translator
+# Bidirectional English-Hindi Translator
 
-A web app that translates English text to Hindi using a pre-trained MarianMT model, fine-tuned on an English-Hindi dataset.
+A web app that translates between English and Hindi using pre-trained MarianMT models, fine-tuned on an English-Hindi dataset.
 
 ## How it works
 
-1. The training script (`training/train.py`) fine-tunes the `Helsinki-NLP/opus-mt-en-hi` model on 50,000 English-Hindi sentence pairs and saves the weights locally. (You can also use `training/fastTrain.py` for a faster training process on a smaller dataset).
-2. The app (`app/app.py`) loads those saved weights and runs a Streamlit web interface where you can type English text and get a Hindi translation.
+1. The training script (`training/train.py`) fine-tunes the `Helsinki-NLP/opus-mt-en-hi` (or `opus-mt-hi-en`) model on 50,000 English-Hindi sentence pairs and saves the weights locally. (You can also use `training/fastTrain.py` for a faster training process on a smaller dataset).
+2. The app (`app/app.py`) loads those saved weights and runs a Streamlit web interface where you can select the translation direction, type text, and get a translation.
 
 ## Tech Stack
 
@@ -51,11 +51,15 @@ PreTrainedTranslator/
 
 **Step 1 — Train the model** *(skip if you already have saved weights)*
 ```bash
-python training/train.py
+# To train English -> Hindi (default)
+python training/train.py --direction en-hi
+
+# To train Hindi -> English
+python training/train.py --direction hi-en
 ```
 *(Tip: Use `python training/fastTrain.py` instead for a much faster training run using a smaller dataset.)*
 
-This downloads the dataset, fine-tunes the model for 1 epoch, and saves the weights to a `model/` folder.
+This downloads the dataset, fine-tunes the model for 1 epoch, and saves the weights to a `model/` (or `model_hi_en/`) folder.
 
 **Step 2 — Run the app**
 ```bash

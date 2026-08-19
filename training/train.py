@@ -4,20 +4,33 @@ from datasets import load_dataset
 from transformers import AutoTokenizer
 from transformers import TFAutoModelForSeq2SeqLM, DataCollatorForSeq2Seq
 from transformers import AdamWeightDecay
+import argparse
 
 # Configuration
-model_checkpoint = 'Helsinki-NLP/opus-mt-en-hi'
+parser = argparse.ArgumentParser(description="Train translation model.")
+parser.add_argument("--direction", type=str, default="en-hi", choices=["en-hi", "hi-en"], help="Translation direction (default: en-hi)")
+args = parser.parse_args()
+
+if args.direction == "en-hi":
+    model_checkpoint = 'Helsinki-NLP/opus-mt-en-hi'
+    source_lang = 'en'
+    target_lang = 'hi'
+    model_save_dir = "model"
+else:
+    model_checkpoint = 'Helsinki-NLP/opus-mt-hi-en'
+    source_lang = 'hi'
+    target_lang = 'en'
+    model_save_dir = "model_hi_en"
+
 max_input_length = 128
 max_target_length = 128
-source_lang = 'en'
-target_lang = 'hi'
 batch_size = 16
 learning_rate = 2e-5
 weight_decay = 0.01
 num_train_epochs = 1
 
 base_dir = os.path.dirname(os.path.dirname(__file__))
-model_save_path = os.path.join(base_dir, "model")
+model_save_path = os.path.join(base_dir, model_save_dir)
 
 print("Loading dataset...")
 raw_datasets = load_dataset('cfilt/iitb-english-hindi')
