@@ -1,5 +1,4 @@
 {
-  "_name_or_path": "Helsinki-NLP/opus-mt-en-hi",
   "activation_dropout": 0.0,
   "activation_function": "swish",
   "add_bias_logits": false,
@@ -8,11 +7,6 @@
     "MarianMTModel"
   ],
   "attention_dropout": 0.0,
-  "bad_words_ids": [
-    [
-      61949
-    ]
-  ],
   "bos_token_id": 0,
   "classif_dropout": 0.0,
   "classifier_dropout": 0.0,
@@ -24,6 +18,7 @@
   "decoder_start_token_id": 61949,
   "decoder_vocab_size": 61950,
   "dropout": 0.1,
+  "dtype": "float32",
   "encoder_attention_heads": 8,
   "encoder_ffn_dim": 2048,
   "encoder_layerdrop": 0.0,
@@ -43,18 +38,18 @@
     "LABEL_1": 1,
     "LABEL_2": 2
   },
-  "max_length": 512,
+  "max_length": null,
   "max_position_embeddings": 512,
   "model_type": "marian",
   "normalize_before": false,
   "normalize_embedding": false,
-  "num_beams": 4,
+  "num_beams": null,
   "num_hidden_layers": 6,
   "pad_token_id": 61949,
   "scale_embedding": true,
   "share_encoder_decoder_embeddings": true,
   "static_position_embeddings": true,
-  "transformers_version": "4.41.2",
+  "transformers_version": "4.57.6",
   "use_cache": true,
   "vocab_size": 61950
 }

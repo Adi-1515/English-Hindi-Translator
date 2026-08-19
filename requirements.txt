@@ -1,7 +1,9 @@
 streamlit
 transformers
 tensorflow
+tf-keras
 torch
+torchvision
 datasets
 numpy
 sentencepiece
